@@ -79,4 +79,64 @@ Now doing similarly for our categorical features, we can split the data by categ
 ![stroke_categorical_pie_charts](https://github.com/NicoMarshall/Stroke-Prediction/assets/109066030/27784b71-7e87-48b1-914e-6605e1c81b37)
 
 
-The differences in distribution are less pronounced here, with only ever_married and smoking_status exhibiting moderate significance. The marriage correlation could plausibly be simply as a weak proxy for age, which we already know to be a strong predictor from the analysis above.
+The differences in distribution are less pronounced here, with only ever_married and smoking_status exhibiting moderate significance. The marriage correlation could plausibly be simply as a weak proxy for age, which we already know to be correlated from the analysis above.
+
+# Stage 3: Modelling
+
+Since classical ML models like a SVMs require numerical inputs, we need to convert the categorical features (e.g gender) into numbers. For this we use Scikit-Learns in-built OneHotEncoder: 
+```
+def encode_categorical_features(dt: pd.DataFrame):
+    """Use sklearns OneHotEncoder to encode categorical features
+
+    Args:
+        dt (pd.DataFrame): cleaned dataframe
+
+    Returns:
+        df_merged: dataframe of encoded categorical features as well as unchanged numerical ones
+    """
+    dt.drop("id", axis=1, inplace=True)
+    text_columns = dt.select_dtypes(include=object).columns.tolist() #lists categorical features
+    encoded_df = pd.DataFrame() # init empty dataframe to sequentially add encoded columns to
+    for col in text_columns: #iterate through categorical features
+        enc = OneHotEncoder(sparse_output=False) # init one hot encoder
+        col_data = dt[[col]] # select column data
+        enc_col = pd.DataFrame(enc.fit_transform(col_data), columns= enc.categories_) # fit encoder and transform data. Then convert to dataframe
+        encoded_df = pd.concat([encoded_df, enc_col], axis=1) # add to encoded_df
+       
+           
+    numeric_df= dt.select_dtypes(include=np.number) # select dataframe of numerical columns
+    encoded_df.reset_index(inplace=True) # reset indices of both dataframes so they can be merged on the index column
+    numeric_df.reset_index(inplace=True)
+    df_merged = pd.merge(encoded_df, numeric_df, left_index=True, right_index=True) # merge numeric with encoded categorical
+    df_merged.columns = df_merged.columns.astype(str) # cast column names to string, SVM doesn't like them otherwie
+    df_merged = df_merged.drop("('index',)", axis = 1) # remove index columns 
+    df_merged = df_merged.drop("index", axis = 1)
+
+    return df_merged # return merged dataframe now ready for training
+ 
+``` 
+We can now split the data into a train and test set, and start training models with different hyperparameters. These can each be evaluated on the test set and compared.
+
+A large issue here is the imbalanced classes in the dataset; positive stroke patients are only 5% of the total. Consequently, with the default hyperparameters the model simply learns to classify all patients as negative stroke and thus achieve a 95% accuracy; clearly this isn't our goal. One work around is to adjust the class_weight hyperparameter, which determines the regularization coefficients for the positive and negative classes. Effectively, this lets us tell the model to prioritise correctly classifying positive classes over negative ones; maximising the recall score at the expense of precision and accuracy. This is a reasonable choice because the cost of incorrectly classifying a positive case is far greater than incorrectly classifying a negative one. 
+
+```
+def train_svm(x_train, y_train):
+    """Train SVM on train set
+
+    Args:
+        x_train 
+        y_train 
+
+    Returns:
+        SVC_Gaussian: Trained Support vector machine, with rbf kernel and optimized class weight dict
+    """
+    SVC_Gaussian = SVC(kernel="rbf", class_weight={0:1, 1: 10})
+    SVC_Gaussian.fit(x_train, y_train)
+    
+    return SVC_Gaussian
+```
+With the above training setup, our model (saved as "model.joblib" in the rbf file) achieves the following metrics on the test set:
+ * Accuracy: 83 %
+ * Precision: 22 %
+ * Recall: 56 %
+
