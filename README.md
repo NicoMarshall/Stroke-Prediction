@@ -46,6 +46,29 @@ def replace_outliers(df: pd.DataFrame):
 Finally, looking at the categorical features; only smoking status has missing values here, but these amount to 20% of total data. This is too high a proportion to simply drop, so we will just replace them with the mode for this column: "never smoked".
 
 # Stage 2: EDA
+We wish to visualise what relationships exist between our target variable ("stroke") and the features.
 
+Experimenting with catplots of the numerical features, we see that the age of a patient has a clear difference in distribution, when we split the data based on the stroke variable:
+
+![age_stroke_catplot](https://github.com/NicoMarshall/Stroke-Prediction/assets/109066030/922951d0-cea0-41d3-8184-7f5b0c38e9c4)
+
+This can be verified statistically by doing t-tests for each feature to see if the means of the two populations (stroke vs no stroke) are  different, using a standard p-value threshold of 0.05:
+```
+numeric_columns = df.select_dtypes(include=np.number).columns.tolist()
+numeric_columns.remove("id")
+numeric_columns.remove("stroke")
+pos_mask = (df["stroke"] > 0.5)
+positive_stroke = df[pos_mask]
+negative_stroke = df[~pos_mask]
+for col in numeric_columns:
+    t_statistic, p_value = ttest_ind(positive_stroke[col], negative_stroke[col], equal_var=False)
+```
+The results are that age, hypertension and heart disease meet the threshold for statistical significance. This is encouraging; three numerical features are strongly correlated with stroke, and may thus have good predicitve power when it comes to training classification models later.
+
+Now doing similarly for our categorical features, we can split the data by category and stroke outcome (0 or 1). Any strong patterns will then hopefully become clear to see:
+![non_stroke_categorical_pie_charts](https://github.com/NicoMarshall/Stroke-Prediction/assets/109066030/1ef59776-2f9e-4cd4-b67a-36d0fe65c324)
+
+
+![stroke_categorical_pie_charts](https://github.com/NicoMarshall/Stroke-Prediction/assets/109066030/27784b71-7e87-48b1-914e-6605e1c81b37)
 
 
