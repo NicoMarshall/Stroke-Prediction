@@ -72,3 +72,4 @@ Now doing similarly for our categorical features, we can split the data by categ
 ![stroke_categorical_pie_charts](https://github.com/NicoMarshall/Stroke-Prediction/assets/109066030/27784b71-7e87-48b1-914e-6605e1c81b37)
 
 
+The differences in distribution are less pronounced here, with only ever_married and smoking_status exhibiting moderate significance. The marriage correlation could plausibly be simply as a weak proxy for age, which we already know to be a strong predictor from the analysis above.
