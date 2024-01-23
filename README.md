@@ -140,4 +140,4 @@ With the above training setup, our model (saved as "model.joblib" in the rbf fil
  * Precision: 22 %
  * Recall: 56 %
 
-In other words, just over half of stroke sufferers are identified by the model. Overall this is a fairly poor performance, probably due to the heavily imbalanced nature of the dataset. The next stage would therefore be to oversample from the positive class using SMOTE ("Synthetic Minority Oversampling Technique").
+In other words, just over half of stroke sufferers are identified by the model. Overall this is a fairly poor performance, probably due to the heavily imbalanced nature of the dataset. The next stage would therefore be to oversample from the positive class using SMOTE ("Synthetic Minority Oversampling Technique"). Additionally, we can try rescaling the dataset so that all features sit within 0 and 1; SVMs are sensitive to scale.
