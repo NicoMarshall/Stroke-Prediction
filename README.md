@@ -45,4 +45,7 @@ def replace_outliers(df: pd.DataFrame):
 ```
 Finally, looking at the categorical features; only smoking status has missing values here, but these amount to 20% of total data. This is too high a proportion to simply drop, so we will just replace them with the mode for this column: "never smoked".
 
+# Stage 2: EDA
+
+
 
