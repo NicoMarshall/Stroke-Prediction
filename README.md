@@ -130,7 +130,7 @@ def train_svm(x_train, y_train):
     Returns:
         SVC_Gaussian: Trained Support vector machine, with rbf kernel and optimized class weight dict
     """
-    SVC_Gaussian = SVC(kernel="rbf", class_weight={0:1, 1: 10})
+    SVC_Gaussian = SVC(kernel="rbf", class_weight={0:1, 1:10})
     SVC_Gaussian.fit(x_train, y_train)
     
     return SVC_Gaussian
@@ -140,3 +140,4 @@ With the above training setup, our model (saved as "model.joblib" in the rbf fil
  * Precision: 22 %
  * Recall: 56 %
 
+In other words, just over half of stroke sufferers are identified by the model.
