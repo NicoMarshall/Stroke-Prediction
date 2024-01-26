@@ -140,7 +140,7 @@ With the above training setup, our model (saved as "model.joblib" in the rbf fil
  * Precision: 22 %
  * Recall: 56 %
 
-In other words, just over half of stroke sufferers are identified by the model. Overall this is a fairly poor performance, probably due to the heavily imbalanced nature of the dataset. The next stage would therefore be to try oversampling from the positive class using SMOTE ("Synthetic Minority Oversampling Technique"). Additionally, we can try rescaling the dataset so that all features sit within 0 and 1; SVMs are sensitive to scale.
+In other words, just over half of stroke sufferers are identified by the model. Overall this is a fairly poor performance, likely due to the heavily imbalanced nature of the dataset which doesn't allow the model to optimize for correctly classifying positive classes. The next stage would therefore be to try oversampling from the positive class using SMOTE ("Synthetic Minority Oversampling Technique"). 
 
 # SMOTE Implementation
 
@@ -152,13 +152,15 @@ oversample = SMOTE() # init SMOTE instance
 X_train, y_train = oversample.fit_resample(X_train, y_train) # augment train set
 pd.DataFrame(X_train, y_train).pivot_table(index='stroke', aggfunc='size').plot(kind='bar', title='Verify resampling') # verify that SMOTE has correctly oversampled the minority class
 ```
+![image](https://github.com/NicoMarshall/Stroke-Prediction/assets/109066030/8a294b08-1f38-40ea-83b7-12a4cc60eed8)
+
 When training the SVM, we also remove the class_weight parameter from before.
 
-The new model and results are in the smote_oversampling folder:
+The new model and results are in the "smote_oversampling" folder:
  * Accuracy: 67 %
  * Precision: 11 %
  * Recall: 79 %
 
-As it is designed to do, SMOTE has increased the Recall at the expense of Accuracy and Precision.
+As it is designed to do, SMOTE has increased the Recall at the expense of Accuracy and Precision. Whilst this is an overall improvement considering the medical context, it still leaves much to be desired. To improve all three metrics at once and avoid the trade-offs observed so far, some fundamental changes are likely to be required; trying new model types and using more data with better features.
 
 
