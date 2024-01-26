@@ -10,7 +10,7 @@ All Jupyter Notebooks written in Python, making use of various data science libr
 
 According to the World Health Organization (WHO) stroke is the 2nd leading cause of death globally, responsible for approximately 11% of total deaths. Therefore, any model that can identify individuals at high risk would be highly useful in public health efforts and patient diagnostics for medical professionals. In this project we use Support Vector Machines (SVM) for this purpose, which fit a hyperplane to split the data into two regions; one for positive stroke and one for negative. SVMs are widely used in healthcare modelling due to their effectiveness on small datasets and binary classification problems such as this.
 
-The three stages of this project are data cleaning, EDA (Exploratory Data Analysis) and model training; each has its own Jupyter notebook. The raw data is included in this repository ("healthcare-dataset-stroke-data.csv") as well as the cleaned version in a pickle file ("cleaned_data.pkl").
+The three stages of this project are data cleaning, EDA (Exploratory Data Analysis), model training; each has its own Jupyter notebook. The raw data is included in this repository ("healthcare-dataset-stroke-data.csv") as well as the cleaned version in a pickle file ("cleaned_data.pkl").
 
 Data source: https://www.kaggle.com/datasets/fedesoriano/stroke-prediction-dataset/data
 
@@ -140,4 +140,25 @@ With the above training setup, our model (saved as "model.joblib" in the rbf fil
  * Precision: 22 %
  * Recall: 56 %
 
-In other words, just over half of stroke sufferers are identified by the model. Overall this is a fairly poor performance, probably due to the heavily imbalanced nature of the dataset. The next stage would therefore be to oversample from the positive class using SMOTE ("Synthetic Minority Oversampling Technique"). Additionally, we can try rescaling the dataset so that all features sit within 0 and 1; SVMs are sensitive to scale.
+In other words, just over half of stroke sufferers are identified by the model. Overall this is a fairly poor performance, probably due to the heavily imbalanced nature of the dataset. The next stage would therefore be to try oversampling from the positive class using SMOTE ("Synthetic Minority Oversampling Technique"). Additionally, we can try rescaling the dataset so that all features sit within 0 and 1; SVMs are sensitive to scale.
+
+# SMOTE Implementation
+
+Since the data includes very few stroke sufferers, simply oversampling by duplicating these patients in the training data isn't likely to be successful. Instead, we try a variation on this known as SMOTE, which creates synthetic data points based on the original data. It achieves this by linearly interpolating datapoints in the minority class with a near neighbour that is also in the minority. Thus, a new datapoint is created that is "somewhere between" these two original datapoints.
+
+Our implementation uses the SMOTE class from the imblearn package:
+```
+oversample = SMOTE() # init SMOTE instance 
+X_train, y_train = oversample.fit_resample(X_train, y_train) # augment train set
+pd.DataFrame(X_train, y_train).pivot_table(index='stroke', aggfunc='size').plot(kind='bar', title='Verify resampling') # verify that SMOTE has correctly oversampled the minority class
+```
+When training the SVM, we also remove the class_weight parameter from before.
+
+The new model and results are in the smote_oversampling folder:
+ * Accuracy: 67 %
+ * Precision: 11 %
+ * Recall: 79 %
+
+As it is designed to do, SMOTE has increased the Recall at the expense of Accuracy and Precision.
+
+
